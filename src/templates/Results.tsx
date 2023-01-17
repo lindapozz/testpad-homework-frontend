@@ -7,19 +7,26 @@ import Spinner from './partials/Spinner';
 function Results() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://localhost:8000/api/urls/')
+    fetch('http://127.0.0.1:8000/api/urls/')
       .then((response) => response.json())
-      .then((data) => setData(data));
-    setIsLoading(false);
+      .then((data) => {
+        setData(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setError('An error occured while fetching the data');
+        setIsLoading(false);
+      });
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
       <Header />
-      <main className="flex-grow mt-40 text-white mx-auto">
+      <main className="flex-grow my-40">
         {isLoading ? (
           <Spinner />
         ) : (
@@ -27,22 +34,25 @@ function Results() {
             <h1 className="text-white text-5xl md:text-6xl font-extrabold leading-tighter tracking-tighter mb-4">
               Results:
             </h1>
-            <table>
-              <thead>
-                <tr>
-                  <th>URL</th>
-                  <th>RESULT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((item) => (
-                  <tr key={item['url']}>
-                    <td>{item['url']}</td>
-                    <td>{item['result']}</td>
+            {error && <div className="text-red">{error}</div>}
+            {data && (
+              <table className="md:w-3/12 mx-auto text-white mx-auto h-400 border-separate border border-slate-400">
+                <thead>
+                  <tr>
+                    <th className="border border-slate-300">URL</th>
+                    <th className="border border-slate-300">RESULT</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {data.map((item) => (
+                    <tr key={item['url']}>
+                      <td className="border border-slate-300">{item['url']}</td>
+                      <td className="border border-slate-300">{item['result']}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </>
         )}
       </main>

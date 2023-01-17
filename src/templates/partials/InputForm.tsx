@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Spinner from './Spinner';
+import Top50Table from './Top50Table';
 
 type Url = {
   url: string;
@@ -10,9 +11,47 @@ function InputForm() {
   const [isLoading, setIsLoading] = useState(false);
   var parser = new DOMParser();
   const [url, setUrl] = useState('');
-  const [result, setResult] = useState(0);
-  const [words, setWords] = useState('');
+  const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [top50, setTop50] = useState([]);
+
+  const textTags = [
+    'p',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'span',
+    'strong',
+    'em',
+    'mark',
+    'del',
+    'ins',
+    'sub',
+    'sup',
+    'pre',
+    'code',
+    'kbd',
+    'samp',
+    'var',
+    'cite',
+    'abbr',
+    'acronym',
+    'blockquote',
+  ];
+
+  const handleTagChange = (e) => {
+    setSelectedTags((prevState) => {
+      if (e.target.checked) {
+        return [...prevState, e.target.value];
+      } else {
+        return prevState.filter((tag) => tag !== e.target.value);
+      }
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,28 +61,23 @@ function InputForm() {
     }
     setError('');
     setIsLoading(true);
-    try {
-      const response = await fetch(url, {
-        mode: 'cors',
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-        },
+    selectedTags.sort;
+    fetch('http://127.0.0.1:8000/words/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: url, selectedTags: selectedTags }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setResult(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setError('An error occured while fetching the data');
+        setIsLoading(false);
       });
-      const htmlString = await response.text();
-      const noScript = htmlString.replace(
-        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-        ''
-      );
-      const noTags = noScript.replace(/<[^>]+>/g, '');
-      const plainText = noTags.replace(/[^\w\s]/gi, '');
-      const words = plainText.split(' ').length;
-      setWords(plainText);
-      setResult(words);
-      saveData(url, words);
-    } catch (err) {
-      console.log(err);
-    }
-    setIsLoading(false);
   };
 
   const validateUrl = (url: string) => {
@@ -51,21 +85,6 @@ function InputForm() {
       /^(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
     );
     return pattern.test(url);
-  };
-
-  const saveData = (url: string, words: number) => {
-    const obj = {
-      url: url,
-      result: words,
-    };
-    fetch('http://localhost:8000/api/urls/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(obj),
-    })
-      .then((response) => response.json())
-      .then((data) => console.log('Success:', data))
-      .catch((error) => console.error('Error:', error));
   };
 
   return isLoading ? (
@@ -79,15 +98,39 @@ function InputForm() {
         <input id="url" type="text" value={url} onChange={(e) => setUrl(e.target.value)} />
         {error && <div className="text-red">{error}</div>}
       </div>
+      <p className="text-white font-bold my-4">
+        Pick and choose your text tags like a boss, or let 'em all loose like a wild animal
+      </p>
+      <div className="md:w-6/12 mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+        {textTags.map((tag, index) => (
+          <div key={index}>
+            <label>
+              <input
+                type="checkbox"
+                value={tag}
+                checked={selectedTags.includes(tag)}
+                onChange={handleTagChange}
+              />
+              <p className="text-white">{tag}</p>
+            </label>
+          </div>
+        ))}
+      </div>
       <input
         className="mt-2 bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         type="submit"
         value="Submit"
       />
-      <div>
-        {result !== 0 && <p className="text-white mb-4">Result: {result}</p>}
-        {words && <p className="text-white">The words are: {words}</p>}
-      </div>
+      {result && (
+        <>
+          <div>
+            <p className="text-white mb-4">Result: {result.result}</p>
+          </div>
+          <div className="overflow-y-auto h-500">
+            <Top50Table top50={result.top50Results}></Top50Table>
+          </div>
+        </>
+      )}
     </form>
   );
 }

@@ -6,6 +6,11 @@ module.exports = {
       colors: {
         red: '#ff3333',
       },
+      height: {
+        300: '300px',
+        500: '500px',
+        400: '400px',
+      },
     },
   },
   plugins: [require('@tailwindcss/forms')],
