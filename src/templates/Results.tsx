@@ -26,7 +26,7 @@ function Results() {
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
       <Header />
-      <main className="flex-grow my-40">
+      <main className="flex-grow mt-40 pb-20">
         {isLoading ? (
           <Spinner />
         ) : (

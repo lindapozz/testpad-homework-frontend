@@ -13,7 +13,7 @@ function Top50Table({ top50 }) {
         {Object.entries(top50).map(([word, frequency], index) => (
           <tr key={index}>
             <td className="border border-slate-300">{word}</td>
-            <td className="border border-slate-300">{frequency}</td>
+            <td className="border border-slate-300">{frequency as number}</td>
           </tr>
         ))}
       </tbody>

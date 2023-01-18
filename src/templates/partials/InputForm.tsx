@@ -11,9 +11,9 @@ function InputForm() {
   const [isLoading, setIsLoading] = useState(false);
   var parser = new DOMParser();
   const [url, setUrl] = useState('');
-  const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-  const [selectedTags, setSelectedTags] = useState([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [result, setResult] = useState(null);
   const [top50, setTop50] = useState([]);
 
   const textTags = [
@@ -71,7 +71,8 @@ function InputForm() {
     })
       .then((response) => response.json())
       .then((data) => {
-        setResult(data);
+        setResult(data.result);
+        setTop50(data.top50Results);
         setIsLoading(false);
       })
       .catch((error) => {
@@ -122,14 +123,14 @@ function InputForm() {
         value="Submit"
       />
       {result && (
-        <>
-          <div>
-            <p className="text-white mb-4">Result: {result.result}</p>
-          </div>
-          <div className="overflow-y-auto h-500">
-            <Top50Table top50={result.top50Results}></Top50Table>
-          </div>
-        </>
+        <div>
+          <p className="text-white mb-4">Result: {result}</p>
+        </div>
+      )}
+      {top50.length !== 0 && (
+        <div className="overflow-y-auto h-500">
+          <Top50Table top50={top50}></Top50Table>
+        </div>
       )}
     </form>
   );

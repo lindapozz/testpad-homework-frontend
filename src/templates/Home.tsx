@@ -30,7 +30,7 @@ function Home() {
 
   const handleAnimate = () => {
     const textWrapper = textWrapperRef.current;
-    if (textWrapper) {
+    if (textWrapper && textWrapper.textContent) {
       textWrapper.innerHTML = textWrapper.textContent.replace(
         /\S/g,
         "<span class='letter'>$&</span>"
@@ -52,7 +52,7 @@ function Home() {
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
       <Header />
-      <main className="flex-grow my-40">
+      <main className="flex-grow mt-40 pb-20">
         <h1 className="relative text-white text-2xl md:text-4xl font-extrabold leading-tighter tracking-tighter mb-4 ml6">
           <span className="text-wrapper">
             <span className="letters" ref={textWrapperRef}>
